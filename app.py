@@ -13,10 +13,15 @@ def get_gemini_response(input_prompt, image):
     response = model.generate_content([input_prompt, image[0]])
     return response.text
 
+def resize_image(image, max_size=(800, 800)):
+    image.thumbnail(max_size)
+    return image
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
-        bytes_data = uploaded_file.getvalue()
+        image = Image.open(uploaded_file)
+        resized_image = resize_image(image)
+        bytes_data = resized_image.getvalue()
 
         image_parts = [{
             "mime_type": uploaded_file.type,
@@ -50,7 +55,7 @@ input_prompt = """
                 Este es el formato que usas para entregar la informacion:
 
                 Nombre cientifico:
-                
+
                 Nombre comun:
 
                 Datos de interes:
