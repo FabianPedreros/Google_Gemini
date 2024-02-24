@@ -3,6 +3,7 @@ import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 from PIL import Image
+from io import BytesIO
 
 load_dotenv()
 
@@ -13,31 +14,42 @@ def get_gemini_response(input_prompt, image):
     response = model.generate_content([input_prompt, image[0]])
     return response.text
 
-def resize_image(image, max_size=(800, 800)):
-    image.thumbnail(max_size)
-    return image
+def scale_image(uploaded_file, max_size=(800, 800)):
+    if uploaded_file is not None:
+        # Abre la imagen y redimensiona
+        image = Image.open(uploaded_file)
+        image.thumbnail(max_size)
+
+        # Convierte la imagen redimensionada a bytes
+        with BytesIO() as output_buffer:
+            image.save(output_buffer, format="JPEG")  # Puedes ajustar el formato según tus necesidades
+            bytes_data = output_buffer.getvalue()
+
+        return bytes_data
+    else:
+        raise FileNotFoundError("No se ha cargado un archivo")
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
-        bytes_data = uploaded_file.getvalue()
-
+        bytes_data = scale_image(uploaded_file)
+        
         image_parts = [{
-            "mime_type": uploaded_file.type,
+            "mime_type": "image/jpeg",  # Puedes ajustar el tipo MIME según tu necesidad
             "data": bytes_data
         }]
         return image_parts
     else:
         raise FileNotFoundError("No se ha cargado un archivo")
-    
-st.set_page_config(page_title = "Identificador de plantas", page_icon=":potted_plant:")
+
+st.set_page_config(page_title="Identificador de plantas", page_icon=":potted_plant:")
 st.header("Identificador de plantas")
-uploaded_file = st.file_uploader("Selecciona una imagen...", type = ["jpg", "jpeg", "png"])
+uploaded_file = st.file_uploader("Selecciona una imagen...", type=["jpg", "jpeg", "png"])
 image = ""
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption="Imagen cargada", use_column_width=True)
 
-submit = st.button("Dame informacion acerca de la planta")
+submit = st.button("Dame información acerca de la planta")
 
 input_prompt = """
                 Eres un experto en agricultura y botanica, de las imagenes de las plantas eres capaz de 
@@ -67,5 +79,5 @@ input_prompt = """
 if submit:
     image_data = input_image_setup(uploaded_file)
     response = get_gemini_response(input_prompt, image_data)
-    st.header("Esta es la informacion de tu planta:")
+    st.header("Esta es la información de tu planta:")
     st.write(response)
