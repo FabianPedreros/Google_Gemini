@@ -10,7 +10,7 @@ genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 
 def get_gemini_response(input_prompt, image):
     model = genai.GenerativeModel('gemini-pro-vision')
-    response = model.generate_content([input_prompt, image])
+    response = model.generate_content([input_prompt, image[0]])
     return response.text
 
 def resize_image(image, max_size=(800, 800)):
@@ -19,9 +19,7 @@ def resize_image(image, max_size=(800, 800)):
 
 def input_image_setup(uploaded_file):
     if uploaded_file is not None:
-        image = Image.open(uploaded_file)
-        resized_image = resize_image(image)
-        bytes_data = resized_image.tobytes()
+        bytes_data = uploaded_file.getvalue()
 
         image_parts = [{
             "mime_type": uploaded_file.type,
