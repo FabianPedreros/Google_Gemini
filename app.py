@@ -21,7 +21,7 @@ def input_image_setup(uploaded_file):
     if uploaded_file is not None:
         image = Image.open(uploaded_file)
         resized_image = resize_image(image)
-        bytes_data = resized_image.getvalue()
+        bytes_data = resized_image.tobytes()
 
         image_parts = [{
             "mime_type": uploaded_file.type,
