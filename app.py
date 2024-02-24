@@ -43,8 +43,16 @@ def input_image_setup(uploaded_file):
 
 st.set_page_config(page_title="Identificador de plantas", page_icon=":potted_plant:")
 st.header("Identificador de plantas")
-uploaded_file = st.file_uploader("Selecciona una imagen...", type=["jpg", "jpeg", "png"])
-image = ""
+
+input_type_selected = st.radio("Como deseas cargar la imagen de tu planta:", ["Tomar Foto", "Cargar Imagen"])
+
+if input_type_selected == "Tomar Foto":
+    uploaded_file = st.camera_input("Toma una foto...")
+    image = ""
+else: 
+    uploaded_file = st.file_uploader("Selecciona una imagen...", type=["jpg", "jpeg", "png"])
+    image = "" 
+    
 if uploaded_file is not None:
     image = Image.open(uploaded_file)
     st.image(image, caption="Imagen cargada", use_column_width=True)
